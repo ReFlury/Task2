@@ -1,0 +1,60 @@
+---
+- name: Настройка веб-сервера и защиты 
+  hosts: web
+  become: yes
+
+  vars:
+    allowed_subnet: "192.168.1.0/24"
+
+  tasks:
+    - name: Установить Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Копировать HTML-файл
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Настроить конфиг сайта
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+      notify: Restart Nginx
+
+    - name: Убедиться, что Nginx запущен и в автозагрузке
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Установить UFW
+      apt:
+        name: ufw
+        state: present
+
+    - name: Разрешить SSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Разрешить HTTP из нашей подсети
+      ufw:
+        rule: allow
+        proto: tcp
+        port: '80'
+        src: "{{ allowed_subnet }}"
+
+    - name: Включить Firewall и запретить всё остальное по умолчанию
+      ufw:
+        state: enabled
+        policy: deny
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
