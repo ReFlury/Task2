@@ -6,8 +6,8 @@
 site.yml — основной плейбук
 inventory.ini — список серверов
 templates — папка с шаблонами Jinja2:
-    index.html.j2 — шаблон главной страницы
-    nginx.conf.j2 — конфигурационный файл Nginx
+index.html.j2 — шаблон главной страницы
+nginx.conf.j2 — конфигурационный файл Nginx
 
 ## Как запустить
 
